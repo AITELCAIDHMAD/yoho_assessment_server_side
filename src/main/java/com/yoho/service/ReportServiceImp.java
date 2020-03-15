@@ -19,6 +19,7 @@ import com.yoho.dao.RuntimeRepository;
 import com.yoho.entities.OEEModel;
 import com.yoho.entities.StatUsesModel;
 import com.yoho.entities.TemperatureModel;
+import com.yoho.projections.MachineTemperatureProjection;
 import com.yoho.projections.MachineTotalProjection;
 
 @Service
@@ -60,23 +61,10 @@ public class ReportServiceImp implements ReportService {
 				List<MachineTotalProjection> listTemerature = productionRepository
 						.getTemerature(machine,dateFrom, dateTo);
 
-				System.out.println("listAVGTemeratureEvery15Min "+listTemerature);
-
 				for (MachineTotalProjection item : listTemerature) {
 					listMachineTeperature.get(machine).add(item.getTotal());
 				}
-				
-				
-				
-				
 			}
-
-		
-				
-
-				
-
-			
 
 			return getTemeratureLabelColor(listMachineTeperature);
 
@@ -161,16 +149,39 @@ public class ReportServiceImp implements ReportService {
 				listPerformance.put(item.getMachineName(), performance);
 				
 				
-				MachineTotalProjection uptime=productionRepository.getTotalMachineIsrunning(item.getMachineName(), dateFrom, date+" 23:55:00",1);
-				MachineTotalProjection lastDuration=productionRepository.getLastDurationIsrunning(item.getMachineName(), dateTo);
+				List<String> listDateDown=productionRepository.getListTime(0,item.getMachineName(), dateFrom, dateTo);
+				List<String>  listDateUP=productionRepository.getListTime(1,item.getMachineName(),dateFrom, dateTo);
 				
-				System.out.println("uptime "+uptime.getTotal());
-				System.out.println("lastDuration"+lastDuration.getTotal());
+				int sizeOfList1=listDateDown.size();
+				int sizeOfList2=listDateUP.size();
+
 				
-				Double uptimeValue=(uptime.getTotal()+lastDuration.getTotal())/1440;
-				listUptimePercentage.put(item.getMachineName(),uptimeValue);
+				Long totalTime=0L; 
+				int t1=0,t2=0;
 				
-				System.out.println("getMachineName "+item.getMachineName()+ "  "+uptimeValue);
+				while(t1<sizeOfList1 && t2<sizeOfList2) {
+					Date d1 = dateFormat.parse(listDateDown.get(t1));
+					Date d2 = dateFormat.parse(listDateUP.get(t2));
+
+					//in milliseconds
+					totalTime+= d2.getTime() - d1.getTime();
+					t1++;t2++;
+				}
+				
+				if(sizeOfList1!=sizeOfList2) {
+					Date d1 = dateFormat.parse(listDateDown.get(sizeOfList1-1));
+					Date d2 = dateFormat.parse(listDateUP.get(sizeOfList2-1));
+
+					//in milliseconds
+					totalTime+= d1.getTime() - d2.getTime();
+					System.out.println("sizeOfList1!=sizeOfList2 "+totalTime);
+				}
+				System.out.println("totalTime hmad "+(totalTime/(1000.0*60*1440)));
+
+				Double downTime=totalTime/(1000.0*60.0); // convert to minutes
+				Double availability=(1440.0-downTime)/(18.0*60.0);  // 75 % it will be 18 hours not 16 hours
+				
+				
 				OEEModel OEEMoelItem=new OEEModel();
 				
 				
@@ -183,10 +194,10 @@ public class ReportServiceImp implements ReportService {
 				
 				
 				OEEMoelItem.setPERFORMANCE(performance);
-				OEEMoelItem.setAVAILABILITY(uptimeValue);
+				OEEMoelItem.setAVAILABILITY(availability);
 				OEEMoelItem.setQUALITY(quality);
 				
-				Double OEE=quality*uptimeValue*performance;
+				Double OEE=quality*availability*performance;
 				OEEMoelItem.setOEE(OEE);
 				
 				OEEModel.add(OEEMoelItem);
@@ -219,6 +230,7 @@ public class ReportServiceImp implements ReportService {
 		List<StatUsesModel> listStatUsesModel = new ArrayList<StatUsesModel>();
 
 		HashMap<String, TreeMap<Integer, Double>> listNetProducedPerHour = new HashMap<String, TreeMap<Integer, Double>>();
+		HashMap<String, Double> listDownTimePercentage = new HashMap<String, Double>();
 
 		// we get date from front end as 2018-01-07
 		String inputDate = date + " 00:00:00";
@@ -233,8 +245,10 @@ public class ReportServiceImp implements ReportService {
 			HashMap<String, Double> listNtProductionPerHour = new HashMap<String, Double>();
 
 			String dateFrom = dateFormat.format(cal.getTime());
+			String startDate=dateFrom;
 			cal.add(Calendar.DAY_OF_WEEK, 1);
 			String dateTo = dateFormat.format(cal.getTime());
+			String endDate=dateTo;
 			cal.add(Calendar.DAY_OF_WEEK, -1);
 
 			List<MachineTotalProjection> listMachinesTotalProduction = productionRepository
@@ -251,22 +265,15 @@ public class ReportServiceImp implements ReportService {
 			System.out.println("listNetProduced = " + listNetProduced);
 			System.out.println("SCRAP_PERCENTAGE = " + SCRAP_PERCENTAGE);
 
-			// calculate downTime
-			List<MachineTotalProjection> totalMachineDownByIsRunningStatus = productionRepository
-					.getTotalMachineDownByIsRunningStatus(dateFrom, dateTo);
-			List<MachineTotalProjection> totalMachineDown = productionRepository.getTotalMachineDownByIsRunningStatus(dateFrom, dateTo);
-
-			HashMap<String, Double> listDownTimePercentage = getDownTimePercentage(totalMachineDownByIsRunningStatus,
-					totalMachineDown);
+			
 
 			for (MachineTotalProjection machineTotalProjection : listMachinesTotalProduction) {
-				listNetProducedPerHour.put(machineTotalProjection.getMachineName(), new TreeMap<Integer, Double>());
 
 				StatUsesModel statUsesModel = new StatUsesModel();
-
+				statUsesModel.setMACHINE(machineTotalProjection.getMachineName());
 				statUsesModel.setDATETIME_FROM(dateFrom);
 				statUsesModel.setDATETIME_TO(dateTo);
-				statUsesModel.setMACHINE(machineTotalProjection.getMachineName());
+				listNetProducedPerHour.put(machineTotalProjection.getMachineName(), new TreeMap<Integer, Double>());
 				listStatUsesModel.add(statUsesModel);
 
 			}
@@ -294,6 +301,8 @@ public class ReportServiceImp implements ReportService {
 				}
 
 			}
+			
+			
 			for (MachineTotalProjection machineTotalProjection : listMachinesTotalProduction) {
 
 				TreeMap<Integer, Double> listNetProducedPerHourMap = listNetProducedPerHour
@@ -301,6 +310,40 @@ public class ReportServiceImp implements ReportService {
 
 				TreeMap<Integer, Double> treeMap = new TreeMap<Integer, Double>(listNetProducedPerHourMap);
 				listNetProducedPerHour.replace(machineTotalProjection.getMachineName(), treeMap);
+				
+				
+				List<String> listDateDown=productionRepository.getListTime(0,machineTotalProjection.getMachineName(), startDate, endDate);
+				List<String>  listDateUP=productionRepository.getListTime(1,machineTotalProjection.getMachineName(),startDate, endDate);
+				
+				int sizeOfList1=listDateDown.size();
+				int sizeOfList2=listDateUP.size();
+
+				
+				Long totalTime=0L; 
+				int t1=0,t2=0;
+				
+				while(t1<sizeOfList1 && t2<sizeOfList2) {
+					Date d1 = dateFormat.parse(listDateDown.get(t1));
+					Date d2 = dateFormat.parse(listDateUP.get(t2));
+
+					//in milliseconds
+					totalTime+= d2.getTime() - d1.getTime();
+					t1++;t2++;
+				}
+				
+				if(sizeOfList1!=sizeOfList2) {
+					Date d1 = dateFormat.parse(listDateDown.get(sizeOfList1-1));
+					Date d2 = dateFormat.parse(listDateUP.get(sizeOfList2-1));
+
+					//in milliseconds
+					totalTime+= d1.getTime() - d2.getTime();
+					System.out.println("sizeOfList1!=sizeOfList2 "+totalTime);
+				}
+				
+				Double downTime=totalTime/(1000.0*60*1440);
+				listDownTimePercentage.put(machineTotalProjection.getMachineName(), downTime);
+				
+				
 
 			}
 
