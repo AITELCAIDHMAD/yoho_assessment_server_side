@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OEEModel {
-	private String MACHINE;
-	private String DATETIME_FROM;
-	private String  DATETIME_TO;
-	private Double  PERFORMANCE;
-	private Double AVAILABILITY;
-	private Double QUALITY;
-	private Double OEE;
+	private String machine;
+	private String datetimeFrom;
+	private String  datetimeTo;
+	private Double  performance;
+	private Double availability;
+	private Double quality;
+	private Double oee;
 }

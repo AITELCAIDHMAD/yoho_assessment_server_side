@@ -47,11 +47,7 @@ public class ReportServiceImp implements ReportService {
 			String dateFrom = dateFormat.format(cal.getTime());
 			cal.add(Calendar.DAY_OF_WEEK, 1);
 			String dateTo = dateFormat.format(cal.getTime());
-			System.out.println("dateFrom "+dateFrom);
-			
-			System.out.println("dateTo "+dateTo);
-			
-			
+				
 			for (String machine : listMachineName) {
 				listMachineTeperature.put(machine, new ArrayList<Double>());
 				
@@ -132,9 +128,7 @@ public class ReportServiceImp implements ReportService {
 			String dateFrom = dateFormat.format(cal.getTime());
 			cal.add(Calendar.DAY_OF_WEEK, 1);
 			String dateTo = dateFormat.format(cal.getTime());
-			System.out.println("dateFrom "+dateFrom);
 			
-			System.out.println("dateTo "+dateTo);
 			
 			
 			
@@ -172,9 +166,7 @@ public class ReportServiceImp implements ReportService {
 
 					//in milliseconds
 					totalTime+= d1.getTime() - d2.getTime();
-					System.out.println("sizeOfList1!=sizeOfList2 "+totalTime);
 				}
-				System.out.println("totalTime hmad "+(totalTime/(1000.0*60*1440)));
 
 				Double downTime=totalTime/(1000.0*60.0); // convert to minutes
 				Double availability=(1440.0-downTime)/(18.0*60.0);  // 75 % it will be 18 hours not 16 hours
@@ -186,32 +178,23 @@ public class ReportServiceImp implements ReportService {
 				
 				Double quality=(item.getTotal()-listSCRAPProduction.get(count).getTotal())/item.getTotal();
 				
-				OEEMoelItem.setMACHINE(item.getMachineName());
-				OEEMoelItem.setDATETIME_FROM(dateTo);
-				OEEMoelItem.setDATETIME_TO(dateFrom);
+				OEEMoelItem.setMachine(item.getMachineName());
+				OEEMoelItem.setDatetimeFrom(dateTo);
+				OEEMoelItem.setDatetimeTo(dateFrom);
 				
 				
-				OEEMoelItem.setPERFORMANCE(performance);
-				OEEMoelItem.setAVAILABILITY(availability);
-				OEEMoelItem.setQUALITY(quality);
+				OEEMoelItem.setPerformance(performance);
+				OEEMoelItem.setAvailability(availability);
+				OEEMoelItem.setQuality(quality);
 				
 				Double OEE=quality*availability*performance;
-				OEEMoelItem.setOEE(OEE);
+				OEEMoelItem.setOee(OEE);
 				
 				OEEModel.add(OEEMoelItem);
 				
 				count++;
 			}
-			
-			System.out.println("listPerformance"+listPerformance);
-			System.out.println("listUptimePercentage"+listUptimePercentage);
-
-			
-			
-			//UPTime
-			
-
-			
+		
 			
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
@@ -259,18 +242,14 @@ public class ReportServiceImp implements ReportService {
 
 			HashMap<String, Double> listNetProduced = boxTwoHashMap.get(0);
 			HashMap<String, Double> SCRAP_PERCENTAGE = boxTwoHashMap.get(1);
-
-			System.out.println("listNetProduced = " + listNetProduced);
-			System.out.println("SCRAP_PERCENTAGE = " + SCRAP_PERCENTAGE);
-
-			
+	
 
 			for (MachineTotalProjection machineTotalProjection : listMachinesTotalProduction) {
 
 				StatUsesModel statUsesModel = new StatUsesModel();
-				statUsesModel.setMACHINE(machineTotalProjection.getMachineName());
-				statUsesModel.setDATETIME_FROM(dateFrom);
-				statUsesModel.setDATETIME_TO(dateTo);
+				statUsesModel.setMachine(machineTotalProjection.getMachineName());
+				statUsesModel.setDatetimeFrom(dateFrom);
+				statUsesModel.setDatetimeTo(dateTo);
 				listNetProducedPerHour.put(machineTotalProjection.getMachineName(), new TreeMap<Integer, Double>());
 				listStatUsesModel.add(statUsesModel);
 
@@ -335,7 +314,6 @@ public class ReportServiceImp implements ReportService {
 
 					//in milliseconds
 					totalTime+= d1.getTime() - d2.getTime();
-					System.out.println("sizeOfList1!=sizeOfList2 "+totalTime);
 				}
 				
 				Double downTime=totalTime/(1000.0*60*1440);
@@ -346,14 +324,12 @@ public class ReportServiceImp implements ReportService {
 			}
 
 			for (StatUsesModel statUsesModel1 : listStatUsesModel) {
-				statUsesModel1.setListNetproductionPerHoure(listNetProducedPerHour.get(statUsesModel1.getMACHINE()));
-				statUsesModel1.setPRODUCTION(listNetProduced.get(statUsesModel1.getMACHINE()));
-				statUsesModel1.setSCRAP_PERCENTAGE(SCRAP_PERCENTAGE.get(statUsesModel1.getMACHINE()));
-				statUsesModel1.setDOWNTIME_PERCENTAGE(listDownTimePercentage.get(statUsesModel1.getMACHINE()));
+				statUsesModel1.setListNetproductionPerHoure(listNetProducedPerHour.get(statUsesModel1.getMachine()));
+				statUsesModel1.setProduction(listNetProduced.get(statUsesModel1.getMachine()));
+				statUsesModel1.setScrapPercentage(SCRAP_PERCENTAGE.get(statUsesModel1.getMachine()));
+				statUsesModel1.setDowntimePercentage(listDownTimePercentage.get(statUsesModel1.getMachine()));
 
 			}
-			System.out.println("listNetProducedPerHour Sorted=>>>" + listNetProducedPerHour);
-			System.out.println("statUsesModel1 " + listStatUsesModel);
 
 		} catch (ParseException e) {
 			e.printStackTrace();
@@ -367,10 +343,7 @@ public class ReportServiceImp implements ReportService {
 
 		HashMap<String, Double> downTimePERCENTAGE = new HashMap<String, Double>();
 
-		System.out.println("totalMachineDownByIsRunningStatus " + totalMachineDownByIsRunningStatus);
-		System.out.println("totalMachineDown " + totalMachineDown);
-
-		int sizeOfList = totalMachineDownByIsRunningStatus.size();
+			int sizeOfList = totalMachineDownByIsRunningStatus.size();
 
 		for (int k = 0; k < sizeOfList; k++) {
 

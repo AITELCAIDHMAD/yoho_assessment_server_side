@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StatUsesModel {
-	private  String MACHINE;
-	private  String DATETIME_FROM;
-	private  String DATETIME_TO;
-	private  Double SCRAP_PERCENTAGE;
-	private  Double DOWNTIME_PERCENTAGE;
-	private  Double PRODUCTION;
+	private  String machine;
+	private  String datetimeFrom;
+	private  String datetimeTo;
+	private  Double scrapPercentage;
+	private  Double downtimePercentage;
+	private  Double production;
 	private  Map<Integer,Double> listNetproductionPerHoure;
 }

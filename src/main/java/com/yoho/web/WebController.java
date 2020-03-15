@@ -24,6 +24,7 @@ public class WebController {
 	@Autowired
 	private ReportService reportService;
 
+	// This For MVC Server Side with theamleaf
 	@RequestMapping(value = "/index/{date}")
 	public String indexPage(Model model,@PathVariable("date") String date) {
 		
