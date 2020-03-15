@@ -42,18 +42,17 @@ public class ReportServiceImp implements ReportService {
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(currentDate);
 
-			List <String>listMachineName = productionRepository.getListMachine();
+			List<String> listMachineName = productionRepository.getListMachine();
 
 			String dateFrom = dateFormat.format(cal.getTime());
 			cal.add(Calendar.DAY_OF_WEEK, 1);
 			String dateTo = dateFormat.format(cal.getTime());
-				
+
 			for (String machine : listMachineName) {
 				listMachineTeperature.put(machine, new ArrayList<Double>());
-				
-				
-				List<MachineTotalProjection> listTemerature = productionRepository
-						.getTemerature(machine,dateFrom, dateTo);
+
+				List<MachineTotalProjection> listTemerature = productionRepository.getTemerature(machine, dateFrom,
+						dateTo);
 
 				for (MachineTotalProjection item : listTemerature) {
 					listMachineTeperature.get(machine).add(item.getTotal());
@@ -68,141 +67,129 @@ public class ReportServiceImp implements ReportService {
 		}
 		return null;
 
-		
 	}
 
 	private HashMap<String, String> getTemeratureLabelColor(HashMap<String, List<Double>> listMachineTeperature) {
 
-		HashMap<String,String> machineTeperature=new HashMap<String, String>();
-		
+		HashMap<String, String> machineTeperature = new HashMap<String, String>();
+
 		for (Map.Entry<String, List<Double>> entry : listMachineTeperature.entrySet()) {
 
-			
-			  int counter = 0;
-		      String status = "good/green";
-		      
-			for(Double item :entry.getValue()) {
-				if (item> 100) {
-	            	status = "fatal/red";
-	            } else if (item > 85) {
-	                counter = counter + 1;
-	            } else {
-	                counter = 0;
-	            };
-	            if (counter >= 4) {
-	                if (status == "good/green") {
-	                    status = "warning/orange";
-	                }
-	            }
+			int counter = 0;
+			String status = "good/green";
+
+			for (Double item : entry.getValue()) {
+				if (item > 100) {
+					status = "fatal/red";
+				} else if (item > 85) {
+					counter = counter + 1;
+				} else {
+					counter = 0;
+				}
+				;
+				if (counter >= 4) {
+					if (status == "good/green") {
+						status = "warning/orange";
+					}
+				}
 			}
-			
+
 			machineTeperature.put(entry.getKey(), status);
-		            
-	
+
 		}
-		
 
 		return machineTeperature;
 	}
 
 	@Override
 	public List<OEEModel> getOEEReport(String date) {
-		List <OEEModel> OEEModel=new ArrayList<OEEModel>();
-		HashMap<String,Double> listOEEModel=new HashMap<String, Double>();
-		HashMap<String,Double> listPerformance=new HashMap<String, Double>();
+		List<OEEModel> OEEModel = new ArrayList<OEEModel>();
+		HashMap<String, Double> listOEEModel = new HashMap<String, Double>();
+		HashMap<String, Double> listPerformance = new HashMap<String, Double>();
 
-		HashMap<String,Double> listUptimePercentage=new HashMap<String, Double>();
-
+		HashMap<String, Double> listUptimePercentage = new HashMap<String, Double>();
 
 		// we get date from front end as 2018-01-07
 		String inputDate = date + " 00:00:00";
-		
-		//Performance% = actual gross production / norm gross production=30.000 * 100% 
-		
+
+		// Performance% = actual gross production / norm gross production=30.000 * 100%
+
 		Date currentDate;
 		try {
 			currentDate = dateFormat.parse(inputDate);
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(currentDate);
-			
+
 			String dateFrom = dateFormat.format(cal.getTime());
 			cal.add(Calendar.DAY_OF_WEEK, 1);
 			String dateTo = dateFormat.format(cal.getTime());
-			
-			
-			
-			
-			List<MachineTotalProjection> listGrossProduction=productionRepository.getTotalProducedGroupByMachineName("PRODUCTION", dateFrom, dateTo);
-			List<MachineTotalProjection> listSCRAPProduction=productionRepository.getTotalProducedGroupByMachineName("SCRAP", dateFrom, dateTo);
 
-			int count=0;
-			for(MachineTotalProjection item : listGrossProduction) {
-				Double performance=item.getTotal()/(30000*24);
+			List<MachineTotalProjection> listGrossProduction = productionRepository
+					.getTotalProducedGroupByMachineName("PRODUCTION", dateFrom, dateTo);
+			List<MachineTotalProjection> listSCRAPProduction = productionRepository
+					.getTotalProducedGroupByMachineName("SCRAP", dateFrom, dateTo);
+
+			int count = 0;
+			for (MachineTotalProjection item : listGrossProduction) {
+				Double performance = item.getTotal() / (30000 * 24);
 				listPerformance.put(item.getMachineName(), performance);
-				
-				
-				List<String> listDateDown=productionRepository.getListTime(0,item.getMachineName(), dateFrom, dateTo);
-				List<String>  listDateUP=productionRepository.getListTime(1,item.getMachineName(),dateFrom, dateTo);
-				
-				int sizeOfList1=listDateDown.size();
-				int sizeOfList2=listDateUP.size();
 
-				
-				Long totalTime=0L; 
-				int t1=0,t2=0;
-				
-				while(t1<sizeOfList1 && t2<sizeOfList2) {
+				List<String> listDateDown = productionRepository.getListTime(0, item.getMachineName(), dateFrom,
+						dateTo);
+				List<String> listDateUP = productionRepository.getListTime(1, item.getMachineName(), dateFrom, dateTo);
+
+				int sizeOfList1 = listDateDown.size();
+				int sizeOfList2 = listDateUP.size();
+
+				Long totalTime = 0L;
+				int t1 = 0, t2 = 0;
+
+				while (t1 < sizeOfList1 && t2 < sizeOfList2) {
 					Date d1 = dateFormat.parse(listDateDown.get(t1));
 					Date d2 = dateFormat.parse(listDateUP.get(t2));
 
-					//in milliseconds
-					totalTime+= d2.getTime() - d1.getTime();
-					t1++;t2++;
-				}
-				
-				if(sizeOfList1!=sizeOfList2) {
-					Date d1 = dateFormat.parse(listDateDown.get(sizeOfList1-1));
-					Date d2 = dateFormat.parse(listDateUP.get(sizeOfList2-1));
-
-					//in milliseconds
-					totalTime+= d1.getTime() - d2.getTime();
+					// in milliseconds
+					totalTime += d2.getTime() - d1.getTime();
+					t1++;
+					t2++;
 				}
 
-				Double downTime=totalTime/(1000.0*60.0); // convert to minutes
-				Double availability=(1440.0-downTime)/(18.0*60.0);  // 75 % it will be 18 hours not 16 hours
-				
-				
-				OEEModel OEEMoelItem=new OEEModel();
-				
-				
-				
-				Double quality=(item.getTotal()-listSCRAPProduction.get(count).getTotal())/item.getTotal();
-				
+				if (sizeOfList1 != sizeOfList2) {
+					Date d1 = dateFormat.parse(listDateDown.get(sizeOfList1 - 1));
+					Date d2 = dateFormat.parse(listDateUP.get(sizeOfList2 - 1));
+
+					// in milliseconds
+					totalTime += d1.getTime() - d2.getTime();
+				}
+
+				Double downTime = totalTime / (1000.0 * 60.0); // convert to minutes
+				Double availability = (1440.0 - downTime) / (18.0 * 60.0); // 75 % it will be 18 hours not 16 hours
+
+				OEEModel OEEMoelItem = new OEEModel();
+
+				Double quality = (item.getTotal() - listSCRAPProduction.get(count).getTotal()) / item.getTotal();
+
 				OEEMoelItem.setMachine(item.getMachineName());
 				OEEMoelItem.setDatetimeFrom(dateTo);
 				OEEMoelItem.setDatetimeTo(dateFrom);
-				
-				
+
 				OEEMoelItem.setPerformance(performance);
 				OEEMoelItem.setAvailability(availability);
 				OEEMoelItem.setQuality(quality);
-				
-				Double OEE=quality*availability*performance;
+
+				Double OEE = quality * availability * performance;
 				OEEMoelItem.setOee(OEE);
-				
+
 				OEEModel.add(OEEMoelItem);
-				
+
 				count++;
 			}
-		
-			
+
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		
+
 		return OEEModel;
 	}
 
@@ -226,10 +213,10 @@ public class ReportServiceImp implements ReportService {
 			HashMap<String, Double> listNtProductionPerHour = new HashMap<String, Double>();
 
 			String dateFrom = dateFormat.format(cal.getTime());
-			String startDate=dateFrom;
+			String startDate = dateFrom;
 			cal.add(Calendar.DAY_OF_WEEK, 1);
 			String dateTo = dateFormat.format(cal.getTime());
-			String endDate=dateTo;
+			String endDate = dateTo;
 			cal.add(Calendar.DAY_OF_WEEK, -1);
 
 			List<MachineTotalProjection> listMachinesTotalProduction = productionRepository
@@ -242,7 +229,6 @@ public class ReportServiceImp implements ReportService {
 
 			HashMap<String, Double> listNetProduced = boxTwoHashMap.get(0);
 			HashMap<String, Double> SCRAP_PERCENTAGE = boxTwoHashMap.get(1);
-	
 
 			for (MachineTotalProjection machineTotalProjection : listMachinesTotalProduction) {
 
@@ -278,8 +264,7 @@ public class ReportServiceImp implements ReportService {
 				}
 
 			}
-			
-			
+
 			for (MachineTotalProjection machineTotalProjection : listMachinesTotalProduction) {
 
 				TreeMap<Integer, Double> listNetProducedPerHourMap = listNetProducedPerHour
@@ -287,39 +272,38 @@ public class ReportServiceImp implements ReportService {
 
 				TreeMap<Integer, Double> treeMap = new TreeMap<Integer, Double>(listNetProducedPerHourMap);
 				listNetProducedPerHour.replace(machineTotalProjection.getMachineName(), treeMap);
-				
-				
-				List<String> listDateDown=productionRepository.getListTime(0,machineTotalProjection.getMachineName(), startDate, endDate);
-				List<String>  listDateUP=productionRepository.getListTime(1,machineTotalProjection.getMachineName(),startDate, endDate);
-				
-				int sizeOfList1=listDateDown.size();
-				int sizeOfList2=listDateUP.size();
 
-				
-				Long totalTime=0L; 
-				int t1=0,t2=0;
-				
-				while(t1<sizeOfList1 && t2<sizeOfList2) {
+				List<String> listDateDown = productionRepository.getListTime(0, machineTotalProjection.getMachineName(),
+						startDate, endDate);
+				List<String> listDateUP = productionRepository.getListTime(1, machineTotalProjection.getMachineName(),
+						startDate, endDate);
+
+				int sizeOfList1 = listDateDown.size();
+				int sizeOfList2 = listDateUP.size();
+
+				Long totalTime = 0L;
+				int t1 = 0, t2 = 0;
+
+				while (t1 < sizeOfList1 && t2 < sizeOfList2) {
 					Date d1 = dateFormat.parse(listDateDown.get(t1));
 					Date d2 = dateFormat.parse(listDateUP.get(t2));
 
-					//in milliseconds
-					totalTime+= d2.getTime() - d1.getTime();
-					t1++;t2++;
+					// in milliseconds
+					totalTime += d2.getTime() - d1.getTime();
+					t1++;
+					t2++;
 				}
-				
-				if(sizeOfList1!=sizeOfList2) {
-					Date d1 = dateFormat.parse(listDateDown.get(sizeOfList1-1));
-					Date d2 = dateFormat.parse(listDateUP.get(sizeOfList2-1));
 
-					//in milliseconds
-					totalTime+= d1.getTime() - d2.getTime();
+				if (sizeOfList1 != sizeOfList2) {
+					Date d1 = dateFormat.parse(listDateDown.get(sizeOfList1 - 1));
+					Date d2 = dateFormat.parse(listDateUP.get(sizeOfList2 - 1));
+
+					// in milliseconds
+					totalTime += d1.getTime() - d2.getTime();
 				}
-				
-				Double downTime=totalTime/(1000.0*60*1440);
+
+				Double downTime = totalTime / (1000.0 * 60 * 1440);
 				listDownTimePercentage.put(machineTotalProjection.getMachineName(), downTime);
-				
-				
 
 			}
 
@@ -343,7 +327,7 @@ public class ReportServiceImp implements ReportService {
 
 		HashMap<String, Double> downTimePERCENTAGE = new HashMap<String, Double>();
 
-			int sizeOfList = totalMachineDownByIsRunningStatus.size();
+		int sizeOfList = totalMachineDownByIsRunningStatus.size();
 
 		for (int k = 0; k < sizeOfList; k++) {
 

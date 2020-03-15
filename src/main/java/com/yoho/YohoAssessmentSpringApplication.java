@@ -1,4 +1,4 @@
-	package com.yoho;
+package com.yoho;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class YohoAssessmentSpringApplication extends SpringBootServletInitialize
 
 	@Autowired
 	private AccountService accountService;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(YohoAssessmentSpringApplication.class);
 
 	@Override
@@ -41,17 +41,16 @@ public class YohoAssessmentSpringApplication extends SpringBootServletInitialize
 	@Override
 	public void run(String... arg0) throws Exception {
 		logger.info("STARTING  APP");
-		
-		AppUser user=accountService.findUserByUsername("hmad");
-		
-		if(user==null) {
-			accountService.saveRole(new AppRole(null,"ADMIN"));
-			accountService.saveRole(new AppRole(null,"USER"));
 
-			accountService.saveUser(new AppUser(null,"hmad", "123", null));
+		AppUser user = accountService.findUserByUsername("hmad");
+
+		if (user == null) {
+			accountService.saveRole(new AppRole(null, "ADMIN"));
+			accountService.saveRole(new AppRole(null, "USER"));
+
+			accountService.saveUser(new AppUser(null, "hmad", "123", null));
 			accountService.addRoleToUser("hmad", "ADMIN");
 		}
-		
-		
+
 	}
 }

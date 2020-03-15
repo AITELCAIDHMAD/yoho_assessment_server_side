@@ -26,6 +26,6 @@ public class Production {
 	private String machine_name;
 	private String variable_name;
 	private String datetime_from;
-	private  String datetime_to;
+	private String datetime_to;
 	private double value;
 }

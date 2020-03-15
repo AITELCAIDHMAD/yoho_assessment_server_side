@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 public class OEEModel {
 	private String machine;
 	private String datetimeFrom;
-	private String  datetimeTo;
-	private Double  performance;
+	private String datetimeTo;
+	private Double performance;
 	private Double availability;
 	private Double quality;
 	private Double oee;

@@ -29,8 +29,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 
 		http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-				.authorizeRequests().antMatchers("/login/","/api/report/**","/index/**","/.well-known/**", "/error/**", "/index", "favicon.ico", "/images/**", "/js/**",
-						"/css/**")
+				.authorizeRequests().antMatchers("/login/", "/api/report/**", "/index/**", "/.well-known/**",
+						"/error/**", "/index", "favicon.ico", "/images/**", "/js/**", "/css/**")
 				.permitAll().
 
 				antMatchers("/api/user/**").hasAnyAuthority("USER").

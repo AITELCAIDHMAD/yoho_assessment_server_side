@@ -28,18 +28,16 @@ public class ReportController {
 	@ResponseBody
 	public List<StatUsesModel> getReport1(@PathVariable("date") String date) {
 		logger.info("getReport1 ");
-			return  reportService.getStatusUsesReport(date);
+		return reportService.getStatusUsesReport(date);
 	}
-	
+
 	@RequestMapping(value = "/api/report/data2/{date}", method = RequestMethod.GET)
 	@ResponseBody
 	public HashMap<String, String> getReport2(@PathVariable("date") String date) {
 		logger.info("getReport2 ");
-             return reportService.getTemperatureReport(date);
+		return reportService.getTemperatureReport(date);
 	}
-	
-	
-	
+
 	@RequestMapping(value = "/api/report/data3/{date}", method = RequestMethod.GET)
 	@ResponseBody
 	public List<OEEModel> getReport3(@PathVariable("date") String date) {
@@ -47,7 +45,5 @@ public class ReportController {
 		return reportService.getOEEReport(date);
 
 	}
-	
-	
-	
+
 }

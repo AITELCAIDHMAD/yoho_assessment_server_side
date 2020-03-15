@@ -26,17 +26,16 @@ public class WebController {
 
 	// This For MVC Server Side with theamleaf
 	@RequestMapping(value = "/index/{date}")
-	public String indexPage(Model model,@PathVariable("date") String date) {
-		
-		HashMap<String, String> temperatureModel=reportService.getTemperatureReport(date);
-		List<OEEModel>  OEEModel=reportService.getOEEReport(date);
-		List<StatUsesModel>  statUsesModel=reportService.getStatusUsesReport(date);
-		
-		model.addAttribute("temperatureModel",temperatureModel);
-		model.addAttribute("OEEModel",OEEModel);
-		model.addAttribute("statUsesModel",statUsesModel);
+	public String indexPage(Model model, @PathVariable("date") String date) {
 
-		
+		HashMap<String, String> temperatureModel = reportService.getTemperatureReport(date);
+		List<OEEModel> OEEModel = reportService.getOEEReport(date);
+		List<StatUsesModel> statUsesModel = reportService.getStatusUsesReport(date);
+
+		model.addAttribute("temperatureModel", temperatureModel);
+		model.addAttribute("OEEModel", OEEModel);
+		model.addAttribute("statUsesModel", statUsesModel);
+
 		return "index";
 	}
 

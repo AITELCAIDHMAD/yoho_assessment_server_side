@@ -23,7 +23,6 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
 		System.err.println("Message => " + ex.getMessage());
 		System.err.println("Cause => " + ex.getCause());
 		System.err.println("Description => " + ex.toString());
-		ex.printStackTrace();
 		ErrorMessage errorMessage = new ErrorMessage(new Date(), errorMessageDescription);
 		return new ResponseEntity<>(errorMessage, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
