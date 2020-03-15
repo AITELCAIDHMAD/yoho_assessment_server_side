@@ -18,8 +18,6 @@ import com.yoho.dao.ProductionRepository;
 import com.yoho.dao.RuntimeRepository;
 import com.yoho.entities.OEEModel;
 import com.yoho.entities.StatUsesModel;
-import com.yoho.entities.TemperatureModel;
-import com.yoho.projections.MachineTemperatureProjection;
 import com.yoho.projections.MachineTotalProjection;
 
 @Service
