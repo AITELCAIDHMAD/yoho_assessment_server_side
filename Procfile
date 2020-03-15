@@ -1,1 +1,1 @@
-web: java -jar target/gitHub_resume_generator.jar
+web: java -jar target/yoho_backend.jar

@@ -5,11 +5,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.yoho</groupId>
-	<artifactId>Yoho_Assessment</artifactId>
+	<artifactId>yoho_backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>Yoho_Assessment</name>
+	<name>yoho_backend</name>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -104,7 +104,7 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>gitHub_resume_generator</finalName>
+		<finalName>yoho_backend</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
